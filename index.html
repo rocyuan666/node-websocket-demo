@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        word-break: break-all;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>客户1</h1>
+      <div>
+        <button onclick="Roc.connectSocket()">连接socket</button>
+      </div>
+      <div>
+        <p id="tips">连接服务已关闭~</p>
+        <input id="input-dom" type="text" />
+        <button onclick="Roc.sendMessage()">发送消息</button>
+        <p id="message-box"></p>
+      </div>
+    </div>
+    <script src="https://unpkg.com/roc-utils@0.2.0/dist/rocUtils.js"></script>
+    <script>
+      const Roc = {
+        socket: null,
+        connectSocket() {
+          const that = this;
+          const tipsDom = document.getElementById("tips");
+          that.socket = new WebSocket("ws://localhost:18081");
+          that.socket.addEventListener("open", function () {
+            tipsDom.style.color = "#0f0";
+            tipsDom.innerHTML = "连接服务已启动";
+          });
+          that.socket.addEventListener("error", function () {
+            tipsDom.style.color = "#f00";
+            tipsDom.innerHTML = "连接服务出错，请重新连接";
+          });
+          that.socket.addEventListener("close", function () {
+            tipsDom.innerHTML = "连接服务已关闭";
+          });
+          that.socket.addEventListener("message", (serverData) => {
+            const pDom = document.createElement("p");
+            pDom.innerHTML = `${rocUtils.formatTime(new Date(), "yyyy-MM-dd HH:mm:ss")}--------${serverData.data}`;
+            document.getElementById("message-box").appendChild(pDom);
+          });
+        },
+        sendMessage() {
+          const message = document.getElementById("input-dom").value;
+          this.socket.send(message);
+        },
+      };
+    </script>
+  </body>
+</html>
